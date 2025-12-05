@@ -463,6 +463,112 @@ require('lazy').setup({
     end,
   },
 
+  {
+    "folke/trouble.nvim",
+    opts = {
+      icons = vim.g.have_nerd_font and {} or {
+        indent = {
+          top = "│ ",
+          middle = "├╴",
+          last = "└╴",
+          fold_open = " ",
+          fold_closed = " ",
+          ws = "  ",
+        },
+        folder_closed = " ",
+        folder_open = " ",
+        kinds = {
+          Array = " ",
+          Boolean = "󰨙 ",
+          Class = " ",
+          Constant = "󰏿 ",
+          Constructor = " ",
+          Enum = " ",
+          EnumMember = " ",
+          Event = " ",
+          Field = " ",
+          File = " ",
+          Function = "󰊕 ",
+          Interface = " ",
+          Key = " ",
+          Method = "󰊕 ",
+          Module = " ",
+          Namespace = "󰦮 ",
+          Null = " ",
+          Number = "󰎠 ",
+          Object = " ",
+          Operator = " ",
+          Package = " ",
+          Property = " ",
+          String = " ",
+          Struct = "󰆼 ",
+          TypeParameter = " ",
+          Variable = "󰀫 ",
+        },
+      },
+    },
+    keys = {
+      {
+        "<leader>xx",
+        "<cmd>Trouble diagnostics toggle<cr>",
+        desc = "Diagnostics (Trouble)",
+      },
+      {
+        "<leader>xX",
+        "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+        desc = "Buffer Diagnostics (Trouble)",
+      },
+      {
+        "<leader>cs",
+        "<cmd>Trouble symbols toggle focus=false<cr>",
+        desc = "Symbols (Trouble)",
+      },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / references / ... (Trouble)",
+      },
+      {
+        "<leader>xL",
+        "<cmd>Trouble loclist toggle<cr>",
+        desc = "Location List (Trouble)",
+      },
+      {
+        "<leader>xQ",
+        "<cmd>Trouble qflist toggle<cr>",
+        desc = "Quickfix List (Trouble)",
+      },
+    },
+  },
+
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
+  },
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    -- Optional dependency
+    dependencies = {  },
+    config = function()
+      require('nvim-autopairs').setup {}
+      -- If you want to automatically add `(` after selecting a function or method
+      -- local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
+      -- local cmp = require 'cmp'
+      -- cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+    end,
+  },
+
   -- LSP Plugins
 
   {
@@ -674,7 +780,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -683,7 +789,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
         --
 
         lua_ls = {
@@ -718,6 +824,9 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'prettierd',
+        'goimports',
+        'gofumpt',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -771,14 +880,14 @@ require('lazy').setup({
     -- Top Pickers & Explorer
     { "<leader><space>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
     { "<leader>,", function() Snacks.picker.buffers() end, desc = "Buffers" },
-    { "<leader>/", function() Snacks.picker.grep() end, desc = "Grep" },
+    { "<leader>/", function() Snacks.picker.grep({ cwd = vim.fn.getcwd() }) end, desc = "Grep" },
     { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
     { "<leader>n", function() Snacks.picker.notifications() end, desc = "Notification History" },
     { "<leader>e", function() Snacks.explorer() end, desc = "File Explorer" },
     -- find
     { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
     { "<leader>fc", function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find Config File" },
-    { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
+    { "<leader>ff", function() Snacks.picker.files({ cwd = vim.fn.getcwd() }) end, desc = "Find Files" },
     { "<leader>fg", function() Snacks.picker.git_files() end, desc = "Find Git Files" },
     { "<leader>fp", function() Snacks.picker.projects() end, desc = "Projects" },
     { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent" },
@@ -798,7 +907,7 @@ require('lazy').setup({
     -- Grep
     { "<leader>sb", function() Snacks.picker.lines() end, desc = "Buffer Lines" },
     { "<leader>sB", function() Snacks.picker.grep_buffers() end, desc = "Grep Open Buffers" },
-    { "<leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
+    { "<leader>sg", function() Snacks.picker.grep({ cwd = vim.fn.getcwd() }) end, desc = "Grep" },
     { "<leader>sw", function() Snacks.picker.grep_word() end, desc = "Visual selection or word", mode = { "n", "x" } },
     -- search
     { '<leader>s"', function() Snacks.picker.registers() end, desc = "Registers" },
@@ -939,7 +1048,9 @@ require('lazy').setup({
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { "prettierd", "prettier", stop_after_first = true },
+        typescript = { "prettierd", "prettier", stop_after_first = true },
+        go = { "goimports", "gofumpt" },
       },
     },
   },
@@ -1043,25 +1154,16 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+  {
+    'loctvl842/monokai-pro.nvim',
+    priority = 1000,
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
-      }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      require('monokai-pro').setup({
+        filter = "pro", -- classic | octagon | pro | machine | ristretto | spectrum
+        -- Enable this to allow other plugins to extend the theme
+        -- override = function(c) return { } end,
+      })
+      vim.cmd('colorscheme monokai-pro')
     end,
   },
 
@@ -1099,6 +1201,26 @@ require('lazy').setup({
         return '%2l:%-2v'
       end
 
+      -- Highlight colors (hex, rgb, etc.)
+      require('mini.hipatterns').setup()
+
+      -- Move lines with Alt+h/j/k/l
+      require('mini.move').setup({
+        mappings = {
+          -- Move visual selection in Visual mode.
+          left = '<M-h>',
+          right = '<M-l>',
+          down = '<M-j>',
+          up = '<M-k>',
+
+          -- Move current line in Normal mode
+          line_left = '<M-h>',
+          line_right = '<M-l>',
+          line_down = '<M-j>',
+          line_up = '<M-k>',
+        },
+      })
+
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
@@ -1109,7 +1231,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'javascript', 'typescript', 'go' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1117,9 +1239,9 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = { '' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { '' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -1129,6 +1251,53 @@ require('lazy').setup({
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
+  {
+  "esmuellert/vscode-diff.nvim",
+  dependencies = { "MunifTanjim/nui.nvim" },
+  cmd = "CodeDiff",
+  config = function()
+    require("vscode-diff").setup({
+      -- Highlight configuration
+      highlights = {
+        -- Line-level: accepts highlight group names or hex colors (e.g., "#2ea043")
+        line_insert = "DiffAdd",      -- Line-level insertions
+        line_delete = "DiffDelete",   -- Line-level deletions
+
+        -- Character-level: accepts highlight group names or hex colors
+        -- If specified, these override char_brightness calculation
+        char_insert = nil,            -- Character-level insertions (nil = auto-derive)
+        char_delete = nil,            -- Character-level deletions (nil = auto-derive)
+
+        -- Brightness multiplier (only used when char_insert/char_delete are nil)
+        -- nil = auto-detect based on background (1.4 for dark, 0.92 for light)
+        char_brightness = nil,        -- Auto-adjust based on your colorscheme
+      },
+
+      -- Diff view behavior
+      diff = {
+        disable_inlay_hints = true,         -- Disable inlay hints in diff windows for cleaner view
+        max_computation_time_ms = 5000,     -- Maximum time for diff computation (VSCode default)
+      },
+
+      -- Keymaps in diff view
+      keymaps = {
+        view = {
+          quit = "q",                    -- Close diff tab
+          toggle_explorer = "<leader>b",  -- Toggle explorer visibility (explorer mode only)
+          next_hunk = "]c",   -- Jump to next change
+          prev_hunk = "[c",   -- Jump to previous change
+          next_file = "]f",   -- Next file in explorer mode
+          prev_file = "[f",   -- Previous file in explorer mode
+        },
+        explorer = {
+          select = "<CR>",    -- Open diff for selected file
+          hover = "K",        -- Show file diff preview
+          refresh = "R",      -- Refresh git status
+        },
+      },
+    })
+  end,
+}
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
